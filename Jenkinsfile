@@ -5,7 +5,7 @@ pipeline {
             steps {
                 sh 'echo "Hello, World!"'
                 sh 'python --version'
-                sh 'testing jenkins'
+                sh 'echo "testing jenkins"'
             }
         }
     }
