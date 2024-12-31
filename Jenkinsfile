@@ -7,7 +7,7 @@ pipeline {
                 sh 'echo "testing jenkins"'
             }
         }
-        
+
         stage('Check Python') {
             steps {
                 sh 'python3 --version'
