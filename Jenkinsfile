@@ -1,17 +1,48 @@
 pipeline {
     agent any
+    
     stages {
-        stage('build') {
+        stage('Setup') {
             steps {
-                sh 'echo "Hello, World!"'
-                sh 'echo "testing jenkins"'
+                dir('jenkins_demo1') {  // Change to jenkins_demo1 directory
+                    sh 'python3 -m pip install --upgrade pip'
+                    sh 'pip3 install -r requirements.txt'
+                }
             }
         }
-
-        stage('Check Python') {
+        
+        stage('Lint') {
             steps {
-                sh 'python3 --version'
-                sh 'pip3 --version'
+                dir('jenkins_demo1') {
+                    sh 'pylint src/ tests/ || true'
+                }
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                dir('jenkins_demo1') {
+                    sh 'python3 -m pytest tests/ --junitxml=test-results/junit.xml'
+                    sh 'coverage run -m pytest tests/'
+                    sh 'coverage report'
+                    sh 'coverage html -d coverage-reports'
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            dir('jenkins_demo1') {
+                junit 'test-results/*.xml'
+                publishHTML([
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: 'coverage-reports',
+                    reportFiles: 'index.html',
+                    reportName: 'Coverage Report'
+                ])
             }
         }
     }
